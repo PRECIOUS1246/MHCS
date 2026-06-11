@@ -1,0 +1,42 @@
+{
+  "name": "mhcs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mental Health Care System for university students",
+  "packageManager": "pnpm@8.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "dev:server": "pnpm --filter server run dev",
+    "dev:client": "pnpm --filter client run dev",
+    "dev:ai": "cd ai-service && python -m uvicorn main:app --reload --port 8001",
+    "build": "pnpm -r run build",
+    "build:server": "pnpm --filter server run build",
+    "build:client": "pnpm --filter client run build",
+    "test": "pnpm -r run test",
+    "test:server": "pnpm --filter server run test",
+    "test:client": "pnpm --filter client run test",
+    "lint": "pnpm -r run lint",
+    "lint:server": "pnpm --filter server run lint",
+    "lint:client": "pnpm --filter client run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,css}\" --ignore-path .gitignore",
+    "type-check": "pnpm -r run type-check",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.0"
+  }
+}
