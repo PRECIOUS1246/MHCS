@@ -8,7 +8,7 @@ async function main() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'student@university.edu', password: 'Password123!' }),
     });
-    const loginJson = await loginRes.json() as any;
+    const loginJson: any = await loginRes.json();
     if (!loginRes.ok) {
       console.error('Login failed', loginJson);
       process.exit(1);
@@ -20,7 +20,7 @@ async function main() {
     const csRes = await fetch(`${API}/appointments/counsellors`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const csJson = await csRes.json() as any;
+    const csJson: any = await csRes.json();
     console.log('Counsellors status', csRes.status);
     if (!csRes.ok) {
       console.error('Failed to fetch counsellors', csJson);
