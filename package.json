@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Mental Health Care System for university students",
-  "packageManager": "npm@11.6.2",
+  
   "workspaces": [
     "client",
     "server"
