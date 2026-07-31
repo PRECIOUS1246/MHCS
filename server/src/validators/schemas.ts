@@ -1,22 +1,58 @@
 import { z } from 'zod';
 
 export const registerSchema = z.object({
-  body: z.object({
-    email: z.string().email('Invalid email'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    firstName: z.string().min(1, 'First name required'),
-    lastName: z.string().min(1, 'Last name required'),
-    role: z.enum(['student', 'counsellor', 'admin']).optional(),
-    studentId: z.string().optional(),
-    department: z.string().optional(),
-  }),
+  body: z
+    .object({
+      fullName: z.string().trim().min(2, 'Full name is required'),
+      email: z.string().trim().email('Invalid email'),
+      studentId: z.string().trim().min(3, 'Student ID is required'),
+      department: z.string().trim().min(2, 'Department is required'),
+      level: z.string().trim().min(1, 'Level is required'),
+      password: z.string().min(8, 'Password must be at least 8 characters'),
+      confirmPassword: z.string().min(1, 'Please confirm your password'),
+    })
+    .superRefine(({ password, confirmPassword }, ctx) => {
+      if (password !== confirmPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['confirmPassword'],
+          message: 'Passwords do not match',
+        });
+      }
+    }),
+});
+
+export const createUserSchema = z.object({
+  body: z
+    .object({
+      fullName: z.string().trim().min(2, 'Full name is required'),
+      email: z.string().trim().email('Invalid email'),
+      role: z.enum(['counsellor', 'admin']),
+      department: z.string().trim().optional(),
+      password: z.string().min(8, 'Password must be at least 8 characters'),
+      confirmPassword: z.string().min(1, 'Please confirm your password'),
+    })
+    .superRefine(({ password, confirmPassword }, ctx) => {
+      if (password !== confirmPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['confirmPassword'],
+          message: 'Passwords do not match',
+        });
+      }
+    }),
 });
 
 export const loginSchema = z.object({
-  body: z.object({
-    email: z.string().email(),
-    password: z.string().min(1),
-  }),
+  body: z
+    .object({
+      email: z.string().email(),
+      password: z.string().min(1).optional(),
+      otp: z.string().regex(/^\d{6}$/).optional(),
+    })
+    .refine((data) => data.password || data.otp, {
+      message: 'Provide a password or a 6-digit OTP',
+    }),
 });
 
 export const assessmentSchema = z.object({

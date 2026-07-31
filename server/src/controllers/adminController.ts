@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
 import {
   User,
   Assessment,
@@ -71,6 +72,55 @@ export const getUsers = async (req: AuthRequest, res: Response, next: NextFuncti
     ]);
 
     res.json({ success: true, ...buildPaginatedResponse(users, total, page, limit) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { fullName, email, password, confirmPassword, role, department } = req.body;
+
+    if (!['counsellor', 'admin'].includes(role)) {
+      throw new AppError('Only counsellor or admin accounts can be created from the admin dashboard', 400);
+    }
+
+    if (password !== confirmPassword) {
+      throw new AppError('Passwords do not match', 400);
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
+    if (existing) throw new AppError('Email already registered', 409);
+
+    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() || fullName.trim();
+    const lastName = nameParts.join(' ');
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await User.create({
+      email: normalizedEmail,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      role,
+      department: department?.trim(),
+      anonymousNickname: `Anonymous${Math.floor(Math.random() * 9000) + 1000}`,
+    });
+
+    const userResponse = {
+      ...user.toObject(),
+      password: undefined,
+      refreshToken: undefined,
+    };
+
+    await logActivity('user_created', 'User', {
+      userId: req.user!.userId,
+      entityId: user._id.toString(),
+      details: { role },
+    });
+
+    res.status(201).json({ success: true, data: userResponse });
   } catch (error) {
     next(error);
   }

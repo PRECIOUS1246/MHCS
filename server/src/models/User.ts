@@ -9,6 +9,7 @@ export interface IUser extends Document {
   role: UserRole;
   studentId?: string;
   department?: string;
+  level?: string;
   avatar?: string;
   anonymousNickname?: string;
   isActive: boolean;
@@ -17,6 +18,8 @@ export interface IUser extends Document {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   lastLogin?: Date;
+  otpHash?: string;
+  otpExpiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +37,7 @@ const userSchema = new Schema<IUser>(
     },
     studentId: { type: String, sparse: true },
     department: { type: String },
+    level: { type: String },
     avatar: { type: String },
     anonymousNickname: { type: String },
     isActive: { type: Boolean, default: true },
@@ -42,6 +46,8 @@ const userSchema = new Schema<IUser>(
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
     lastLogin: { type: Date },
+    otpHash: { type: String, select: false },
+    otpExpiresAt: { type: Date, select: false },
   },
   { timestamps: true }
 );

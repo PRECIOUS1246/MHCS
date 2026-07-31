@@ -16,7 +16,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
   const handleLogout = async () => {
     try { await api.post('/auth/logout'); } catch { /* ignore */ }
     logout();
-    navigate('/login');
+    navigate('/student/login');
   };
 
   return (

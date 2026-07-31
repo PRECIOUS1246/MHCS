@@ -2,12 +2,13 @@ import { Router } from 'express';
 import * as adminController from '../controllers/adminController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { paginationSchema } from '../validators/schemas';
+import { createUserSchema, paginationSchema } from '../validators/schemas';
 
 const router = Router();
 
 router.get('/dashboard', authenticate, authorize('admin'), adminController.getDashboardStats);
 router.get('/users', authenticate, authorize('admin'), validate(paginationSchema), adminController.getUsers);
+router.post('/users', authenticate, authorize('admin'), validate(createUserSchema), adminController.createUser);
 router.patch('/users/:id', authenticate, authorize('admin'), adminController.updateUser);
 router.delete('/users/:id', authenticate, authorize('admin'), adminController.deleteUser);
 router.get('/activity-logs', authenticate, authorize('admin'), validate(paginationSchema), adminController.getActivityLogs);

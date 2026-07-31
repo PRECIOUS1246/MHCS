@@ -37,8 +37,10 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<Navigate to="/student/login" replace />} />
+      <Route path="/register" element={<Navigate to="/student/register" replace />} />
+      <Route path="/student/login" element={<LoginPage />} />
+      <Route path="/student/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 

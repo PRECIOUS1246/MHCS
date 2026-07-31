@@ -16,7 +16,13 @@ const seed = async () => {
   for (const u of users) {
     await User.findOneAndUpdate(
       { email: u.email },
-      { ...u, password, isEmailVerified: true, anonymousNickname: `User${Math.floor(Math.random() * 9999)}` },
+      {
+        ...u,
+        password,
+        isActive: true,
+        isEmailVerified: true,
+        anonymousNickname: `User${Math.floor(Math.random() * 9999)}`,
+      },
       { upsert: true }
     );
   }

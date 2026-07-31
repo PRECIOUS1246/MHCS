@@ -37,7 +37,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch {
         useAuthStore.getState().logout();
-        window.location.href = '/login';
+        window.location.href = '/student/login';
       }
     }
     return Promise.reject(error);

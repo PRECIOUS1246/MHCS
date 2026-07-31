@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
   const { isAuthenticated, user } = useAuthStore();
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/student/login" replace />;
   if (roles && user && !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }

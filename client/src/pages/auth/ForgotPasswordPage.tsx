@@ -31,7 +31,7 @@ export const ForgotPasswordPage = () => {
             <Button type="submit" loading={loading} className="w-full">Send reset link</Button>
           </form>
         )}
-        <Link to="/login" className="block mt-4 text-calm-600 text-sm hover:underline">Back to login</Link>
+        <Link to="/student/login" className="block mt-4 text-calm-600 text-sm hover:underline">Back to login</Link>
       </div>
     </div>
   );

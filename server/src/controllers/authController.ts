@@ -6,6 +6,7 @@ import { AuthRequest } from '../middleware/auth';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { AppError, UnauthorizedError } from '../utils/errors';
 import { logActivity } from '../services/activityLogService';
+import { sendOtpEmail } from '../services/emailService';
 import { config } from '../config';
 
 const cookieOptions = {
@@ -15,22 +16,46 @@ const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+const otpLifetimeMs = 10 * 60 * 1000;
+const generateOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
 export const register = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { email, password, firstName, lastName, role, studentId, department } = req.body;
+    const { fullName, email, password, confirmPassword, studentId, department, level } = req.body;
 
-    const existing = await User.findOne({ email });
-    if (existing) throw new AppError('Email already registered', 409);
+    if (!fullName || !email || !studentId || !department || !level || !password || !confirmPassword) {
+      throw new AppError('All fields are required', 400);
+    }
+
+    if (password !== confirmPassword) {
+      throw new AppError('Passwords do not match', 400);
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedStudentId = studentId.toString().trim().toUpperCase();
+
+    const [existingEmail, existingStudentId] = await Promise.all([
+      User.findOne({ email: normalizedEmail }),
+      User.findOne({ studentId: normalizedStudentId }),
+    ]);
+
+    if (existingEmail) throw new AppError('Email already registered', 409);
+    if (existingStudentId) throw new AppError('Student ID already registered', 409);
+
+    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() || fullName.trim();
+    const lastName = nameParts.join(' ');
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       firstName,
       lastName,
-      role: role || 'student',
-      studentId,
-      department,
+      role: 'student',
+      studentId: normalizedStudentId,
+      department: department.trim(),
+      level: level.trim(),
       anonymousNickname: `Anonymous${Math.floor(Math.random() * 9000) + 1000}`,
     });
 
@@ -67,14 +92,55 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const login = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, otp } = req.body;
 
-    const user = await User.findOne({ email }).select('+password +refreshToken');
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    const user = await User.findOne({ email }).select('+password +refreshToken +otpHash +otpExpiresAt');
+    if (!user) {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    if (!user.isActive) throw new UnauthorizedError('Account is deactivated');
+    if (otp) {
+      if (!user.otpHash || !user.otpExpiresAt || new Date(user.otpExpiresAt) < new Date()) {
+        throw new AppError('OTP expired or not requested', 400);
+      }
+
+      const isValidOtp = await bcrypt.compare(otp, user.otpHash);
+      if (!isValidOtp) {
+        throw new UnauthorizedError('Invalid OTP');
+      }
+
+      user.otpHash = undefined;
+      user.otpExpiresAt = undefined;
+    } else {
+      if (!password) {
+        throw new AppError('Password required', 400);
+      }
+
+      if (!(await bcrypt.compare(password, user.password))) {
+        throw new UnauthorizedError('Invalid email or password');
+      }
+
+      if (!user.isActive) throw new UnauthorizedError('Account is deactivated');
+
+      const otpCode = generateOtpCode();
+      user.otpHash = await bcrypt.hash(otpCode, 8);
+      user.otpExpiresAt = new Date(Date.now() + otpLifetimeMs);
+      await user.save();
+
+      const previewUrl = await sendOtpEmail(user.email, otpCode);
+
+      const response: any = {
+        success: true,
+        requiresOtp: true,
+        message: 'A one-time verification code has been sent to your email address.',
+      };
+      if (previewUrl && process.env.NODE_ENV !== 'production') {
+        response.previewUrl = previewUrl;
+      }
+
+      res.json(response);
+      return;
+    }
 
     const payload = { userId: user._id.toString(), email: user.email, role: user.role };
     const accessToken = generateAccessToken(payload);

@@ -61,6 +61,18 @@ cd server && npm run seed
 npm run dev
 ```
 
+### Email / OTP Configuration
+
+To send real OTP emails, configure SMTP in the server environment. Set these variables in `server/.env` or your deployment configuration:
+
+- `SMTP_HOST` — your SMTP server host
+- `SMTP_PORT` — your SMTP port (usually `587` for TLS or `465` for SSL)
+- `SMTP_USER` — SMTP auth username
+- `SMTP_PASS` — SMTP auth password
+- `SMTP_FROM` — optional sender address (default: `no-reply@mhcs.local`)
+
+If SMTP is not configured, the app uses Ethereal in development and returns an email preview URL instead of delivering a real message.
+
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:5173 |
