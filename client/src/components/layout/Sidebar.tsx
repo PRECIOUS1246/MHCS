@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Heart, ClipboardList, MessageCircle, Users,
-  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield, X
+  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield, X, User
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -38,9 +38,14 @@ interface SidebarProps {
 
 export const Sidebar = ({ onMobileClose }: SidebarProps) => {
   const { user } = useAuthStore();
-  const links =
-    user?.role === 'admin' ? adminLinks :
-    user?.role === 'counsellor' ? counsellorLinks : studentLinks;
+  const links = [
+    { to: '/profile', icon: User, label: 'Profile' },
+    ...(user?.role === 'admin'
+      ? adminLinks
+      : user?.role === 'counsellor'
+        ? counsellorLinks
+        : studentLinks),
+  ];
 
   return (
     <aside className="flex flex-col w-64 min-h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur border-r border-slate-200 dark:border-slate-700 p-4">

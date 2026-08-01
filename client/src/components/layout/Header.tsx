@@ -30,11 +30,16 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           <button onClick={toggle} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
+            aria-label="View profile"
+          >
             <User className="w-4 h-4 text-calm-600" />
             <span className="text-sm font-medium hidden sm:inline">{user?.firstName}</span>
             <span className="text-xs text-slate-500 capitalize hidden md:inline">({user?.role})</span>
-          </div>
+          </button>
           <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600" aria-label="Logout">
             <LogOut className="w-5 h-5" />
           </button>
