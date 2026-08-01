@@ -18,11 +18,7 @@ type FormData = z.infer<typeof schema>;
 
 export const LoginPage = () => {
   const [error, setError] = useState('');
-  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
-  const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [previewUrl, setPreviewUrl] = useState('');
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
 
@@ -33,19 +29,8 @@ export const LoginPage = () => {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setError('');
-    setInfo('');
     try {
-      const payload = otpStep ? { email: data.email, otp } : data;
-      const res = await api.post('/auth/login', payload);
-
-      if (res.data.requiresOtp) {
-        setOtpStep(true);
-        setInfo(res.data.message || 'Enter the verification code sent to your email.');
-        if (res.data.previewUrl) {
-          setPreviewUrl(res.data.previewUrl);
-        }
-        return;
-      }
+      const res = await api.post('/auth/login', data);
 
       setAuth(res.data.data.user, res.data.data.accessToken);
       navigate('/dashboard');
@@ -69,40 +54,20 @@ export const LoginPage = () => {
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="glass-card p-8 space-y-5">
           {error && <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 text-sm">{error}</div>}
-          {info && <div className="p-3 rounded-xl bg-calm-50 dark:bg-calm-900/20 text-calm-700 dark:text-calm-300 text-sm">{info}</div>}
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
             <input {...register('email')} type="email" className="input-field" placeholder="you@university.edu" />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
-          {!otpStep && (
-            <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
-              <input {...register('password')} type="password" className="input-field" />
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-            </div>
-          )}
-          {otpStep && (
-            <div>
-              <label className="block text-sm font-medium mb-2">Verification code</label>
-              <input
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                inputMode="numeric"
-                className="input-field"
-                placeholder="Enter 6-digit code"
-              />
-            </div>
-          )}
-          {previewUrl && (
-            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-200 text-sm">
-              Preview OTP email: <a href={previewUrl} target="_blank" rel="noreferrer" className="underline">open email</a>
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium mb-2">Password</label>
+            <input {...register('password')} type="password" className="input-field" />
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+          </div>
           <div className="flex justify-end">
             <Link to="/forgot-password" className="text-sm text-calm-600 hover:underline">Forgot password?</Link>
           </div>
-          <Button type="submit" loading={loading} className="w-full">{otpStep ? 'Verify code' : 'Sign in'}</Button>
+          <Button type="submit" loading={loading} className="w-full">Sign in</Button>
           <p className="text-center text-sm text-slate-500">
             New here? <Link to="/student/register" className="text-calm-600 font-medium hover:underline">Create account</Link>
           </p>

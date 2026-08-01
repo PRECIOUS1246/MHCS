@@ -1,7 +1,6 @@
 import { login, register } from './authController';
 import { User } from '../models';
 import bcrypt from 'bcryptjs';
-import { sendOtpEmail } from '../services/emailService';
 
 jest.mock('../models', () => ({
   User: {
@@ -22,10 +21,6 @@ jest.mock('../services/activityLogService', () => ({
   logActivity: jest.fn(),
 }));
 
-jest.mock('../services/emailService', () => ({
-  sendOtpEmail: jest.fn(),
-}));
-
 jest.mock('../utils/jwt', () => ({
   generateAccessToken: jest.fn(() => 'access-token'),
   generateRefreshToken: jest.fn(() => 'refresh-token'),
@@ -41,13 +36,12 @@ jest.mock('../config', () => ({
 describe('authController login', () => {
   const mockedUser = User as unknown as { findOne: jest.Mock; create: jest.Mock };
   const mockedBcrypt = bcrypt as unknown as { compare: jest.Mock; hash: jest.Mock };
-  const mockedSendOtpEmail = sendOtpEmail as unknown as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('sends an OTP to a real user email after password verification', async () => {
+  it('logs in successfully after password verification without OTP', async () => {
     const user = {
       _id: { toString: () => 'user-1' },
       email: 'real.user@example.com',
@@ -59,16 +53,12 @@ describe('authController login', () => {
       anonymousNickname: 'real-user',
       save: jest.fn().mockResolvedValue(true),
       refreshToken: undefined,
-      otpHash: undefined,
-      otpExpiresAt: undefined,
     };
 
     mockedUser.findOne.mockReturnValue({
       select: jest.fn().mockResolvedValue(user),
     });
     mockedBcrypt.compare.mockResolvedValue(true);
-    mockedBcrypt.hash.mockResolvedValue('otp-hash');
-    mockedSendOtpEmail.mockResolvedValue(true);
 
     const req = { body: { email: 'real.user@example.com', password: 'Password123!' }, ip: '127.0.0.1' };
     const res = {
@@ -80,9 +70,8 @@ describe('authController login', () => {
     await login(req as any, res as any, next as any);
 
     expect(mockedBcrypt.compare).toHaveBeenCalledWith('Password123!', 'hashed-password');
-    expect(mockedSendOtpEmail).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ requiresOtp: true, success: true })
+      expect.objectContaining({ success: true, data: expect.objectContaining({ user: expect.objectContaining({ role: 'student' }) }) })
     );
     expect(next).not.toHaveBeenCalled();
   });

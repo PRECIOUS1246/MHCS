@@ -6,7 +6,6 @@ import { AuthRequest } from '../middleware/auth';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { AppError, UnauthorizedError } from '../utils/errors';
 import { logActivity } from '../services/activityLogService';
-import { sendOtpEmail } from '../services/emailService';
 import { config } from '../config';
 
 const cookieOptions = {
@@ -16,8 +15,6 @@ const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-const otpLifetimeMs = 10 * 60 * 1000;
-const generateOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export const register = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -92,55 +89,22 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const login = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { email, password, otp } = req.body;
+    const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select('+password +refreshToken +otpHash +otpExpiresAt');
+    const user = await User.findOne({ email }).select('+password +refreshToken');
     if (!user) {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    if (otp) {
-      if (!user.otpHash || !user.otpExpiresAt || new Date(user.otpExpiresAt) < new Date()) {
-        throw new AppError('OTP expired or not requested', 400);
-      }
-
-      const isValidOtp = await bcrypt.compare(otp, user.otpHash);
-      if (!isValidOtp) {
-        throw new UnauthorizedError('Invalid OTP');
-      }
-
-      user.otpHash = undefined;
-      user.otpExpiresAt = undefined;
-    } else {
-      if (!password) {
-        throw new AppError('Password required', 400);
-      }
-
-      if (!(await bcrypt.compare(password, user.password))) {
-        throw new UnauthorizedError('Invalid email or password');
-      }
-
-      if (!user.isActive) throw new UnauthorizedError('Account is deactivated');
-
-      const otpCode = generateOtpCode();
-      user.otpHash = await bcrypt.hash(otpCode, 8);
-      user.otpExpiresAt = new Date(Date.now() + otpLifetimeMs);
-      await user.save();
-
-      const previewUrl = await sendOtpEmail(user.email, otpCode);
-
-      const response: any = {
-        success: true,
-        requiresOtp: true,
-        message: 'A one-time verification code has been sent to your email address.',
-      };
-      if (previewUrl && process.env.NODE_ENV !== 'production') {
-        response.previewUrl = previewUrl;
-      }
-
-      res.json(response);
-      return;
+    if (!password) {
+      throw new AppError('Password required', 400);
     }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedError('Invalid email or password');
+    }
+
+    if (!user.isActive) throw new UnauthorizedError('Account is deactivated');
 
     const payload = { userId: user._id.toString(), email: user.email, role: user.role };
     const accessToken = generateAccessToken(payload);
