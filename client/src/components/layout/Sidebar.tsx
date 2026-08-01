@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Heart, ClipboardList, MessageCircle, Users,
-  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield
+  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield, X
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -32,28 +32,45 @@ const adminLinks = [
   { to: '/admin/logs', icon: Shield, label: 'Activity Logs' },
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onMobileClose?: () => void;
+}
+
+export const Sidebar = ({ onMobileClose }: SidebarProps) => {
   const { user } = useAuthStore();
   const links =
     user?.role === 'admin' ? adminLinks :
     user?.role === 'counsellor' ? counsellorLinks : studentLinks;
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur border-r border-slate-200 dark:border-slate-700 p-4">
-      <div className="flex items-center gap-2 px-3 py-4 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-calm-400 to-lavender-500 flex items-center justify-center">
-          <Heart className="w-5 h-5 text-white" />
+    <aside className="flex flex-col w-64 min-h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur border-r border-slate-200 dark:border-slate-700 p-4">
+      <div className="flex items-center justify-between gap-2 px-3 py-4 mb-6">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-calm-400 to-lavender-500 flex items-center justify-center">
+            <Heart className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="font-display font-bold text-lg text-slate-800 dark:text-white">MHCS</h1>
+            <p className="text-xs text-slate-500">Mental Health Care</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display font-bold text-lg text-slate-800 dark:text-white">MHCS</h1>
-          <p className="text-xs text-slate-500">Mental Health Care</p>
-        </div>
+        {onMobileClose && (
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
       <nav className="flex-1 space-y-1">
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
+            onClick={() => onMobileClose?.()}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 isActive
