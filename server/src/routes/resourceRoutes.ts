@@ -6,7 +6,7 @@ import { resourceSchema, paginationSchema } from '../validators/schemas';
 
 const router = Router();
 
-router.get('/', authenticate, validate(paginationSchema), resourceController.getResources);
+router.get('/', validate(paginationSchema), resourceController.getResources);
 router.post('/', authenticate, authorize('admin'), validate(resourceSchema), resourceController.createResource);
 router.patch('/:id', authenticate, authorize('admin'), resourceController.updateResource);
 router.delete('/:id', authenticate, authorize('admin'), resourceController.deleteResource);

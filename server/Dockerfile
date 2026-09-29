@@ -35,6 +35,7 @@ COPY --from=builder /app/dist ./dist
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN mkdir -p /app/uploads/chat && chown -R nodejs:nodejs /app/uploads
 USER nodejs
 
 EXPOSE 5000

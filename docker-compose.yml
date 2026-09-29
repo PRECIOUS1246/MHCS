@@ -31,6 +31,8 @@ services:
     restart: unless-stopped
     ports:
       - '5000:5000'
+    volumes:
+      - chat_uploads:/app/uploads
     environment:
       MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/mhcs?authSource=admin
       NODE_ENV: ${NODE_ENV:-production}
@@ -89,6 +91,8 @@ volumes:
   mongodb_data:
     driver: local
   mongodb_config:
+    driver: local
+  chat_uploads:
     driver: local
 
 networks:

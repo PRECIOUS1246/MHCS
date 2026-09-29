@@ -6,6 +6,8 @@ export interface IResource extends Document {
   type: 'article' | 'video' | 'guide' | 'strategy' | 'emergency';
   content?: string;
   url?: string;
+  imageUrl?: string;
+  videoUrl?: string;
   tags: string[];
   isPublished: boolean;
   createdBy: mongoose.Types.ObjectId;
@@ -24,6 +26,8 @@ const resourceSchema = new Schema<IResource>(
     },
     content: { type: String },
     url: { type: String },
+    imageUrl: { type: String },
+    videoUrl: { type: String },
     tags: { type: [String], default: [] },
     isPublished: { type: Boolean, default: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },

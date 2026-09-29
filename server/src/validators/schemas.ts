@@ -110,6 +110,8 @@ export const resourceSchema = z.object({
     type: z.enum(['article', 'video', 'guide', 'strategy', 'emergency']),
     content: z.string().optional(),
     url: z.string().url().optional().or(z.literal('')),
+    imageUrl: z.string().url().optional().or(z.literal('')),
+    videoUrl: z.string().url().optional().or(z.literal('')),
     tags: z.array(z.string()).optional(),
     isPublished: z.boolean().optional(),
   }),

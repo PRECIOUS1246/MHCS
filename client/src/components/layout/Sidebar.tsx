@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Heart, ClipboardList, MessageCircle, Users,
-  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield, X, User
+  Calendar, BookOpen, Bell, AlertTriangle, Settings, Shield, X, User, Gamepad2, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -14,6 +14,7 @@ const studentLinks = [
   { to: '/appointments', icon: Calendar, label: 'Appointments' },
   { to: '/resources', icon: BookOpen, label: 'Resources' },
   { to: '/notifications', icon: Bell, label: 'Notifications' },
+  { to: '/game', icon: Gamepad2, label: 'Game' },
 ];
 
 const counsellorLinks = [
@@ -33,10 +34,13 @@ const adminLinks = [
 ];
 
 interface SidebarProps {
+  collapsed?: boolean;
   onMobileClose?: () => void;
+  onToggleCollapse?: () => void;
+  onNavigate?: () => void;
 }
 
-export const Sidebar = ({ onMobileClose }: SidebarProps) => {
+export const Sidebar = ({ collapsed = false, onMobileClose, onToggleCollapse, onNavigate }: SidebarProps) => {
   const { user } = useAuthStore();
   const links = [
     { to: '/profile', icon: User, label: 'Profile' },
@@ -48,44 +52,67 @@ export const Sidebar = ({ onMobileClose }: SidebarProps) => {
   ];
 
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-white/80 dark:bg-slate-900/80 backdrop-blur border-r border-slate-200 dark:border-slate-700 p-4">
-      <div className="flex items-center justify-between gap-2 px-3 py-4 mb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-calm-400 to-lavender-500 flex items-center justify-center">
-            <Heart className="w-5 h-5 text-white" />
+    <aside className={`sticky top-0 flex h-screen flex-col overflow-hidden border-r border-violet-200/80 bg-[#f4eefb] p-4 text-slate-700 shadow-[0_0_30px_rgba(76,29,149,0.08)] transition-all duration-300 dark:border-[#433759] dark:bg-[#221b31] dark:text-slate-100 ${collapsed ? 'w-20' : 'w-64'}`}>
+      <div className="mb-6 flex items-center justify-between gap-2 px-2 py-4">
+        <div className={`flex items-center gap-2 ${collapsed ? 'w-full justify-center' : ''}`}>
+          <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 shadow-lg shadow-violet-500/20 flex items-center justify-center">
+            <Heart className="h-5 w-5 text-white" />
           </div>
-          <div>
-            <h1 className="font-display font-bold text-lg text-slate-800 dark:text-white">MHCS</h1>
-            <p className="text-xs text-slate-500">Mental Health Care</p>
-          </div>
+          {!collapsed && (
+            <div>
+              <h1 className="font-display text-lg font-bold text-slate-800 dark:text-white">MHCS</h1>
+              <p className="text-xs text-violet-600 dark:text-violet-200/80">Mental Health Care</p>
+            </div>
+          )}
         </div>
         {onMobileClose && (
           <button
             type="button"
             onClick={onMobileClose}
-            className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-2 hover:bg-violet-100 lg:hidden dark:hover:bg-white/10"
             aria-label="Close menu"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5 text-slate-700 dark:text-white" />
           </button>
         )}
       </div>
-      <nav className="flex-1 space-y-1">
+
+      {onToggleCollapse && (
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="mb-4 hidden items-center justify-center rounded-xl border border-violet-200 bg-white/70 p-2 text-violet-700 transition hover:bg-violet-100 lg:flex dark:border-violet-700 dark:bg-[#2a213c] dark:text-violet-100"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
+      )}
+
+      <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
-            onClick={() => onMobileClose?.()}
+            onClick={() => {
+              onMobileClose?.();
+              onNavigate?.();
+            }}
+            title={collapsed ? label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              `group relative flex items-center rounded-xl transition-all ${collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'} ${
                 isActive
-                  ? 'bg-calm-100 dark:bg-calm-900/30 text-calm-700 dark:text-calm-300'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-violet-100 text-violet-900 shadow-sm shadow-violet-200/80 dark:bg-[#5e4d8a] dark:text-white'
+                  : 'text-slate-600 hover:bg-violet-50 hover:text-violet-900 dark:text-violet-100/80 dark:hover:bg-white/5 dark:hover:text-white'
               }`
             }
           >
-            <Icon className="w-5 h-5" />
-            <span className="font-medium">{label}</span>
+            <Icon className="h-5 w-5 shrink-0" />
+            {!collapsed && <span className="font-medium">{label}</span>}
+            {collapsed && (
+              <span className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-slate-100 dark:text-slate-900">
+                {label}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

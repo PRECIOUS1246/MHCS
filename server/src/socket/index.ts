@@ -5,6 +5,7 @@ import { config } from '../config';
 import { ChatMessage, User } from '../models';
 import { setSocketIO } from '../services/notificationService';
 import { JwtPayload } from '../types';
+import { removeChatMediaFile } from '../utils/chatMediaStorage';
 
 const onlineUsers = new Map<string, string>();
 
@@ -100,6 +101,7 @@ export const initializeSocket = (httpServer: HttpServer): Server => {
       if (message.senderId.toString() !== userId) return;
 
       await ChatMessage.findByIdAndDelete(messageId);
+      if (message.media?.fileId) await removeChatMediaFile(message.media.fileId);
       io.to(message.roomId).emit('chat:deleted', { id: messageId });
     });
 

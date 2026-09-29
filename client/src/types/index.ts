@@ -60,6 +60,8 @@ export interface Resource {
   type: string;
   content?: string;
   url?: string;
+  imageUrl?: string;
+  videoUrl?: string;
   tags: string[];
 }
 

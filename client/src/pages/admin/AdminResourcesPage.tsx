@@ -5,13 +5,23 @@ import { Button } from '../../components/ui/Button';
 
 export const AdminResourcesPage = () => {
   const [form, setForm] = useState({
-    title: '', description: '', type: 'article', content: '', tags: [] as string[],
+    title: '',
+    description: '',
+    type: 'article',
+    content: '',
+    imageUrl: '',
+    videoUrl: '',
+    url: '',
+    tags: [] as string[],
   });
   const [saved, setSaved] = useState(false);
 
   const create = async () => {
-    await api.post('/resources', form);
-    setForm({ title: '', description: '', type: 'article', content: '', tags: [] });
+    await api.post('/resources', {
+      ...form,
+      tags: form.title ? [form.title.toLowerCase().replace(/\s+/g, '-') ] : [],
+    });
+    setForm({ title: '', description: '', type: 'article', content: '', imageUrl: '', videoUrl: '', url: '', tags: [] });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -29,6 +39,9 @@ export const AdminResourcesPage = () => {
             ))}
           </select>
           <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="input-field min-h-[120px]" placeholder="Content" />
+          <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="input-field" placeholder="Image URL (optional)" />
+          <input value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })} className="input-field" placeholder="Video URL (optional)" />
+          <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="input-field" placeholder="External link (optional)" />
           <Button onClick={create}>{saved ? 'Created!' : 'Create Resource'}</Button>
         </div>
       </Card>

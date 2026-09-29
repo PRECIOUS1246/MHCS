@@ -8,7 +8,8 @@ const startServer = async () => {
   await connectDatabase();
 
   const httpServer = http.createServer(app);
-  initializeSocket(httpServer);
+  const io = initializeSocket(httpServer);
+  app.set('io', io);
 
   httpServer.listen(config.port, () => {
     console.log(`MHCS Server running on port ${config.port} [${config.nodeEnv}]`);

@@ -19,16 +19,23 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const url = originalRequest?.url ?? '';
+    const isPublicRequest = url.includes('/resources') || url.includes('/health') || url.includes('/auth/login') || url.includes('/auth/register');
+
     try {
       const method = originalRequest?.method?.toUpperCase();
-      const url = originalRequest?.url;
       const status = error.response?.status;
       const message = error.response?.data?.message || error.message;
       console.error(`API error: ${method} ${url} -> ${status} :`, message, error.response?.data || error);
     } catch (logErr) {
       console.error('API error (failed to format):', error);
     }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isPublicRequest) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       try {
         const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });

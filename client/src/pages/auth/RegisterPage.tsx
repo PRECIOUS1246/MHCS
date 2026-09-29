@@ -48,52 +48,52 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-calm-50 to-lavender-50 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="auth-shell min-h-screen flex items-center justify-center p-4">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-md glass-card p-8">
-        <h1 className="text-2xl font-display font-bold mb-2">Create a student account</h1>
-        <p className="text-sm text-slate-500 mb-6">Register as a student to access assessments, mood tracking, and support resources.</p>
-        {error && <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+        <h1 className="mb-2 text-2xl font-display font-bold text-slate-900 dark:text-white">Create a student account</h1>
+        <p className="mb-6 text-sm text-slate-600 dark:text-slate-300">Register as a student to access assessments, mood tracking, and support resources.</p>
+        {error && <div className="mb-4 rounded-xl bg-red-50/90 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-200">{error}</div>}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Full name</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Full name</label>
             <input {...register('fullName')} className="input-field mt-1" />
-            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
+            {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>}
           </div>
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
             <input {...register('email')} type="email" className="input-field mt-1" />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Student ID</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Student ID</label>
               <input {...register('studentId')} className="input-field mt-1" />
-              {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId.message}</p>}
+              {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId.message}</p>}
             </div>
             <div>
-              <label className="text-sm font-medium">Level</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Level</label>
               <input {...register('level')} className="input-field mt-1" placeholder="100" />
-              {errors.level && <p className="text-red-500 text-xs mt-1">{errors.level.message}</p>}
+              {errors.level && <p className="mt-1 text-xs text-red-500">{errors.level.message}</p>}
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Department</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Department</label>
             <input {...register('department')} className="input-field mt-1" />
-            {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
+            {errors.department && <p className="mt-1 text-xs text-red-500">{errors.department.message}</p>}
           </div>
           <div>
-            <label className="text-sm font-medium">Password</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Password</label>
             <input {...register('password')} type="password" className="input-field mt-1" />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
           </div>
           <div>
-            <label className="text-sm font-medium">Confirm password</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Confirm password</label>
             <input {...register('confirmPassword')} type="password" className="input-field mt-1" />
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+            {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
           </div>
           <Button type="submit" loading={loading} className="w-full">Register</Button>
-          <p className="text-center text-sm text-slate-500">
-            Have an account? <Link to="/student/login" className="text-calm-600 hover:underline">Sign in</Link>
+          <p className="text-center text-sm text-slate-700 dark:text-slate-200">
+            Have an account? <Link to="/student/login" className="text-calm-600 hover:underline dark:text-calm-300">Sign in</Link>
           </p>
         </form>
       </motion.div>
