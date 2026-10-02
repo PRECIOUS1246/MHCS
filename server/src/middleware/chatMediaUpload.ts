@@ -30,8 +30,11 @@ const upload = multer({
   },
 });
 
+type UploadHandler = (req: Request, res: Response, callback: (error?: unknown) => void) => void;
+const uploadSingleMedia = upload.single('media') as unknown as UploadHandler;
+
 export const uploadChatMedia = (req: Request, res: Response, next: NextFunction) => {
-  upload.single('media')(req, res, (error: unknown) => {
+  uploadSingleMedia(req, res, (error) => {
     if (!error) {
       next();
       return;
