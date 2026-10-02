@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY .npmrc ./
 
 # Install all dependencies (including dev)
 RUN npm ci
@@ -25,7 +24,6 @@ RUN apk add --no-cache dumb-init
 
 # Copy package files
 COPY package*.json ./
-COPY .npmrc ./
 
 # Install only production dependencies
 RUN npm ci --omit=dev && npm cache clean --force
