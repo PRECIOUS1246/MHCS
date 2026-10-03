@@ -3,6 +3,7 @@ import { Search, ExternalLink, Play } from 'lucide-react';
 import api from '../../api/client';
 import { Card } from '../../components/ui/Card';
 import type { Resource } from '../../types';
+import { mergeDefaultResources } from '../../utils/resources';
 import { getVideoEmbedUrl, getVideoPreviewUrl } from '../../utils/video';
 
 const defaultResources: Resource[] = [
@@ -122,10 +123,6 @@ const defaultResources: Resource[] = [
   },
 ];
 
-const defaultResourcesByTitle = new Map(
-  defaultResources.map((resource) => [resource.title.toLowerCase(), resource])
-);
-
 export const ResourcesPage = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [search, setSearch] = useState('');
@@ -144,21 +141,11 @@ export const ResourcesPage = () => {
       .then((res) => {
         if (!isCurrentRequest) return;
         const loaded: Resource[] = Array.isArray(res.data?.data) ? res.data.data : [];
-        const withDefaultMedia = loaded.map((item) => {
-          const fallback = defaultResourcesByTitle.get(item.title.toLowerCase());
-          return fallback
-            ? {
-                ...item,
-                imageUrl: item.imageUrl || fallback.imageUrl,
-                videoUrl: item.videoUrl || fallback.videoUrl,
-              }
-            : item;
-        });
-        setResources(withDefaultMedia.filter((item) => !typeFilter || item.type === typeFilter));
+        setResources(mergeDefaultResources(loaded, defaultResources, search, typeFilter));
       })
       .catch(() => {
         if (isCurrentRequest) {
-          setResources(defaultResources.filter((item) => !typeFilter || item.type === typeFilter));
+          setResources(mergeDefaultResources([], defaultResources, search, typeFilter));
         }
       })
       .finally(() => {
